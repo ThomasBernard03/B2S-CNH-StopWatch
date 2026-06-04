@@ -59,6 +59,7 @@ dependencies {
     ksp(libs.room.compiler)
 
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.core.splashscreen)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
