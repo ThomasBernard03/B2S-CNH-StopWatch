@@ -19,8 +19,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,32 +28,15 @@ import fr.b2s.cnhstopwatch.presentation.core.theme.CNHStopWatchTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewStopwatchScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: NewStopwatchViewModel
-) {
-    val uiState by viewModel.uiState.collectAsState()
-    NewStopwatchScreenContent(
-        uiState = uiState,
-        onNavigateBack = onNavigateBack,
-        onNameChanged = { viewModel.onEvent(NewStopwatchEvent.OnNameChanged(it)) },
-        onCreateStopWatch = { viewModel.onEvent(NewStopwatchEvent.OnCreateStopWatch) }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun NewStopwatchScreenContent(
     uiState: NewStopwatchUiState,
-    onNavigateBack: () -> Unit,
-    onNameChanged: (String) -> Unit,
-    onCreateStopWatch: () -> Unit
+    onEvent : (NewStopwatchEvent) -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("New Stopwatch") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = { onEvent(NewStopwatchEvent.OnGoBack) }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = "Back"
@@ -74,7 +55,7 @@ internal fun NewStopwatchScreenContent(
         ) {
             OutlinedTextField(
                 value = uiState.name,
-                onValueChange = onNameChanged,
+                onValueChange = { onEvent(NewStopwatchEvent.OnNameChanged(it)) },
                 label = { Text("Name") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -83,7 +64,7 @@ internal fun NewStopwatchScreenContent(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = onCreateStopWatch,
+                onClick = { onEvent(NewStopwatchEvent.OnCreateStopWatch) },
                 enabled = uiState.name.isNotBlank() && !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -104,11 +85,9 @@ internal fun NewStopwatchScreenContent(
 @Composable
 private fun NewStopwatchScreenPreview() {
     CNHStopWatchTheme {
-        NewStopwatchScreenContent(
+        NewStopwatchScreen(
             uiState = NewStopwatchUiState(),
-            onNavigateBack = {},
-            onNameChanged = {},
-            onCreateStopWatch = {}
+            onEvent = {}
         )
     }
 }

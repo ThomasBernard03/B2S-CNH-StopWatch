@@ -20,6 +20,7 @@ class NewStopwatchViewModel(
         when (event) {
             is NewStopwatchEvent.OnNameChanged -> onNameChanged(event.name)
             is NewStopwatchEvent.OnCreateStopWatch -> createStopwatch()
+            NewStopwatchEvent.OnGoBack -> Unit
         }
     }
 
