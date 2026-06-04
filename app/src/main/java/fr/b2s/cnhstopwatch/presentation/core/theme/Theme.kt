@@ -1,6 +1,5 @@
-package fr.b2s.cnhstopwatch.ui.theme
+package fr.b2s.cnhstopwatch.presentation.core.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme

@@ -1,4 +1,4 @@
-package fr.b2s.cnhstopwatch.ui.theme
+package fr.b2s.cnhstopwatch.presentation.core.theme
 
 import androidx.compose.ui.graphics.Color
 
