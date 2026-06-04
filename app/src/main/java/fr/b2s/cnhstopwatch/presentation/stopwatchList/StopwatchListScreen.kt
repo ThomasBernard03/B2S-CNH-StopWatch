@@ -28,9 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fr.b2s.cnhstopwatch.domain.models.Stopwatch
 import fr.b2s.cnhstopwatch.presentation.core.theme.CNHStopWatchTheme
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +74,7 @@ fun StopwatchListScreen(
                     items(uiState.stopwatches, key = { it.id }) { stopwatch ->
                         StopwatchListItem(
                             stopwatch = stopwatch,
+                            displayedMillis = uiState.displayedMillis[stopwatch.id] ?: 0L,
                             onClick = { onEvent(StopwatchListEvent.OnStopwatchClick(stopwatch.id)) }
                         )
                     }
@@ -89,6 +87,7 @@ fun StopwatchListScreen(
 @Composable
 private fun StopwatchListItem(
     stopwatch: Stopwatch,
+    displayedMillis: Long,
     onClick: () -> Unit
 ) {
     Card(
@@ -106,17 +105,24 @@ private fun StopwatchListItem(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = formatDate(stopwatch.createdAt),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = formatElapsedTime(displayedMillis),
+                style = MaterialTheme.typography.headlineSmall,
+                color = if (stopwatch.isRunning) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
             )
         }
     }
 }
 
-private fun formatDate(timestamp: Long): String {
-    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-    return formatter.format(Date(timestamp))
+private fun formatElapsedTime(millis: Long): String {
+    val totalSeconds = millis / 1000
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    return String.format("%02d:%02d:%02d", hours, minutes, seconds)
 }
 
 @Preview(showBackground = true)
@@ -126,10 +132,11 @@ private fun StopwatchListScreenPreview() {
         StopwatchListScreen(
             uiState = StopwatchListUiState(
                 stopwatches = listOf(
-                    Stopwatch(id = 1, name = "Task 1", createdAt = System.currentTimeMillis()),
-                    Stopwatch(id = 2, name = "Task 2", createdAt = System.currentTimeMillis())
+                    Stopwatch(id = 1, name = "Task 1", createdAt = System.currentTimeMillis(), isRunning = true, accumulatedMillis = 60000L),
+                    Stopwatch(id = 2, name = "Task 2", createdAt = System.currentTimeMillis(), accumulatedMillis = 125000L)
                 ),
-                isLoading = false
+                isLoading = false,
+                displayedMillis = mapOf(1L to 62000L, 2L to 125000L)
             ),
             onEvent = {}
         )

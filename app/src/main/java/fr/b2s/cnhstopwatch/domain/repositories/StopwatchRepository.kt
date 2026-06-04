@@ -5,5 +5,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface StopwatchRepository {
     suspend fun createStopwatch(name: String)
+    suspend fun startStopwatch(id: Long)
+    suspend fun stopStopwatch(id: Long)
+    suspend fun resetStopwatch(id: Long)
     fun getAllStopwatches(): Flow<List<Stopwatch>>
+    fun getStopwatchById(id: Long): Flow<Stopwatch?>
 }

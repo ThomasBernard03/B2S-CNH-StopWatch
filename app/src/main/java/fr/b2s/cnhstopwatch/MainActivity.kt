@@ -7,13 +7,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import fr.b2s.cnhstopwatch.presentation.core.theme.CNHStopWatchTheme
 import fr.b2s.cnhstopwatch.presentation.newStopwatch.NewStopwatchEvent
 import fr.b2s.cnhstopwatch.presentation.newStopwatch.NewStopwatchScreen
 import fr.b2s.cnhstopwatch.presentation.newStopwatch.NewStopwatchViewModel
+import fr.b2s.cnhstopwatch.presentation.stopwatchDetail.StopwatchDetailEvent
+import fr.b2s.cnhstopwatch.presentation.stopwatchDetail.StopwatchDetailScreen
+import fr.b2s.cnhstopwatch.presentation.stopwatchDetail.StopwatchDetailViewModel
 import fr.b2s.cnhstopwatch.presentation.stopwatchList.StopwatchListEvent
 import fr.b2s.cnhstopwatch.presentation.stopwatchList.StopwatchListScreen
 import fr.b2s.cnhstopwatch.presentation.stopwatchList.StopwatchListViewModel
@@ -37,13 +42,13 @@ class MainActivity : ComponentActivity() {
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         StopwatchListScreen(
                             uiState = uiState,
-                            onEvent = { event ->
-                                when (event) {
-                                    StopwatchListEvent.OnCreateNew -> navController.navigate("new_stopwatch")
-                                    is StopwatchListEvent.OnStopwatchClick -> Unit
-                                }
-                                viewModel.onEvent(event)
+                        onEvent = { event ->
+                            when (event) {
+                                StopwatchListEvent.OnCreateNew -> navController.navigate("new_stopwatch")
+                                is StopwatchListEvent.OnStopwatchClick -> navController.navigate("stopwatch_detail/${event.id}")
                             }
+                            viewModel.onEvent(event)
+                        }
                         )
                     }
                     composable("new_stopwatch") {
@@ -54,6 +59,22 @@ class MainActivity : ComponentActivity() {
                             onEvent = { event ->
                                 when (event) {
                                     NewStopwatchEvent.OnGoBack -> navController.popBackStack()
+                                    else -> viewModel.onEvent(event)
+                                }
+                            }
+                        )
+                    }
+                    composable(
+                        route = "stopwatch_detail/{id}",
+                        arguments = listOf(navArgument("id") { type = NavType.LongType })
+                    ) {
+                        val viewModel = koinViewModel<StopwatchDetailViewModel>()
+                        val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                        StopwatchDetailScreen(
+                            uiState = uiState,
+                            onEvent = { event ->
+                                when (event) {
+                                    StopwatchDetailEvent.OnGoBack -> navController.popBackStack()
                                     else -> viewModel.onEvent(event)
                                 }
                             }

@@ -4,5 +4,6 @@ import fr.b2s.cnhstopwatch.domain.models.Stopwatch
 
 data class StopwatchListUiState(
     val stopwatches: List<Stopwatch> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val displayedMillis: Map<Long, Long> = emptyMap()
 )

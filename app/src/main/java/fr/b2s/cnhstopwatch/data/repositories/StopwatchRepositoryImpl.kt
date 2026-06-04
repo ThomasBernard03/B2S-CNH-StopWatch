@@ -16,15 +16,51 @@ internal class StopwatchRepositoryImpl(
         stopwatchDao.insert(entity)
     }
 
+    override suspend fun startStopwatch(id: Long) {
+        val entity = stopwatchDao.getById(id) ?: return
+        val updated = entity.copy(
+            isRunning = true,
+            startedAt = System.currentTimeMillis()
+        )
+        stopwatchDao.update(updated)
+    }
+
+    override suspend fun stopStopwatch(id: Long) {
+        val entity = stopwatchDao.getById(id) ?: return
+        val updated = entity.copy(
+            isRunning = false,
+            accumulatedMillis = entity.accumulatedMillis + (System.currentTimeMillis() - entity.startedAt),
+            startedAt = 0L
+        )
+        stopwatchDao.update(updated)
+    }
+
+    override suspend fun resetStopwatch(id: Long) {
+        val entity = stopwatchDao.getById(id) ?: return
+        val updated = entity.copy(
+            isRunning = false,
+            startedAt = 0L,
+            accumulatedMillis = 0L
+        )
+        stopwatchDao.update(updated)
+    }
+
     override fun getAllStopwatches(): Flow<List<Stopwatch>> {
         return stopwatchDao.getAll().map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
+    override fun getStopwatchById(id: Long): Flow<Stopwatch?> {
+        return stopwatchDao.getByIdFlow(id).map { it?.toDomain() }
+    }
+
     private fun StopwatchEntity.toDomain() = Stopwatch(
         id = id,
         name = name,
-        createdAt = createdAt
+        createdAt = createdAt,
+        isRunning = isRunning,
+        startedAt = startedAt,
+        accumulatedMillis = accumulatedMillis
     )
 }
