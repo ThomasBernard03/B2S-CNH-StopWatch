@@ -11,9 +11,10 @@ internal class StopwatchRepositoryImpl(
     private val stopwatchDao: StopwatchDao
 ) : StopwatchRepository {
 
-    override suspend fun createStopwatch(name: String) {
+    override suspend fun createStopwatch(name: String) : Stopwatch {
         val entity = StopwatchEntity(name = name)
-        stopwatchDao.insert(entity)
+        val id = stopwatchDao.insert(entity)
+        return entity.toDomain().copy(id = id)
     }
 
     override suspend fun startStopwatch(id: Long) {

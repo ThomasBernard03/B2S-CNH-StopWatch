@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface StopwatchDao {
 
     @Insert
-    suspend fun insert(stopwatch: StopwatchEntity)
+    suspend fun insert(stopwatch: StopwatchEntity) : Long
 
     @Update
     suspend fun update(stopwatch: StopwatchEntity)

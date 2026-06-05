@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,15 +32,21 @@ fun NewStopwatchScreen(
     uiState: NewStopwatchUiState,
     onEvent : (NewStopwatchEvent) -> Unit
 ) {
+    LaunchedEffect(uiState.createdStopWatch) {
+        uiState.createdStopWatch?.let {
+            onEvent(NewStopwatchEvent.OnStopWatchCreated(it))
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("New Stopwatch") },
+                title = { Text("Nouveau chronomètre") },
                 navigationIcon = {
                     IconButton(onClick = { onEvent(NewStopwatchEvent.OnGoBack) }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = "Retour"
                         )
                     }
                 }
@@ -56,7 +63,7 @@ fun NewStopwatchScreen(
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = { onEvent(NewStopwatchEvent.OnNameChanged(it)) },
-                label = { Text("Name") },
+                label = { Text("Nom") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -74,7 +81,7 @@ fun NewStopwatchScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Create")
+                    Text("Créer")
                 }
             }
         }

@@ -20,7 +20,7 @@ class NewStopwatchViewModel(
         when (event) {
             is NewStopwatchEvent.OnNameChanged -> onNameChanged(event.name)
             is NewStopwatchEvent.OnCreateStopWatch -> createStopwatch()
-            NewStopwatchEvent.OnGoBack -> Unit
+            NewStopwatchEvent.OnGoBack, is NewStopwatchEvent.OnStopWatchCreated -> Unit
         }
     }
 
@@ -32,8 +32,11 @@ class NewStopwatchViewModel(
         if (_uiState.value.name.isBlank()) return
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            createStopwatchUseCase(_uiState.value.name)
-            _uiState.update { it.copy(isLoading = false, name = "") }
+            val createdStopwatch = createStopwatchUseCase(_uiState.value.name)
+            _uiState.update { it.copy(name = "", createdStopWatch = createdStopwatch) }
+        }
+        .invokeOnCompletion {
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 }

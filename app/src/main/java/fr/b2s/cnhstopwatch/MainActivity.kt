@@ -44,8 +44,12 @@ class MainActivity : ComponentActivity() {
                             uiState = uiState,
                         onEvent = { event ->
                             when (event) {
-                                StopwatchListEvent.OnCreateNew -> navController.navigate("new_stopwatch")
-                                is StopwatchListEvent.OnStopwatchClick -> navController.navigate("stopwatch_detail/${event.id}")
+                                StopwatchListEvent.OnCreateNew -> navController.navigate("new_stopwatch"){
+                                    launchSingleTop = true
+                                }
+                                is StopwatchListEvent.OnStopwatchClick -> navController.navigate("stopwatch_detail/${event.id}"){
+                                    launchSingleTop = true
+                                }
                             }
                             viewModel.onEvent(event)
                         }
@@ -59,6 +63,14 @@ class MainActivity : ComponentActivity() {
                             onEvent = { event ->
                                 when (event) {
                                     NewStopwatchEvent.OnGoBack -> navController.popBackStack()
+                                    is NewStopwatchEvent.OnStopWatchCreated -> {
+                                        navController.navigate("stopwatch_detail/${event.stopwatch.id}"){
+                                            launchSingleTop = true
+                                            popUpTo("new_stopwatch"){
+                                                inclusive = true
+                                            }
+                                        }
+                                    }
                                     else -> viewModel.onEvent(event)
                                 }
                             }

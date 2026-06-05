@@ -1,12 +1,15 @@
 package fr.b2s.cnhstopwatch.presentation.stopwatchList
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -24,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import fr.b2s.cnhstopwatch.domain.models.Stopwatch
@@ -38,46 +42,44 @@ fun StopwatchListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Stopwatches") }
+                title = { Text("Chronomètres") }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { onEvent(StopwatchListEvent.OnCreateNew) }) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "New Stopwatch"
+                    contentDescription = "Nouveau chronomètre"
                 )
             }
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            if (uiState.isLoading) {
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (uiState.stopwatches.isEmpty()) {
+            }
+        } else if (uiState.stopwatches.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 Text(
-                    text = "No stopwatches yet",
+                    text = "Aucun chronomètre",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.Center)
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(uiState.stopwatches, key = { it.id }) { stopwatch ->
-                        StopwatchListItem(
-                            stopwatch = stopwatch,
-                            displayedMillis = uiState.displayedMillis[stopwatch.id] ?: 0L,
-                            onClick = { onEvent(StopwatchListEvent.OnStopwatchClick(stopwatch.id)) }
-                        )
-                    }
+            }
+        } else {
+            LazyColumn(
+                contentPadding = innerPadding,
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.stopwatches, key = { it.id }) { stopwatch ->
+                    StopwatchListItem(
+                        stopwatch = stopwatch,
+                        displayedMillis = uiState.displayedMillis[stopwatch.id] ?: 0L,
+                        onClick = { onEvent(StopwatchListEvent.OnStopwatchClick(stopwatch.id)) }
+                    )
                 }
             }
         }
