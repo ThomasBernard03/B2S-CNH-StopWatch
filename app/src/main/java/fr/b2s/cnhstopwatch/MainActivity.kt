@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                         LaunchedEffect(uiState.isDeleted) {
                             if (uiState.isDeleted) {
-                                navController.popBackStack()
+                                navController.navigateUp()
                             }
                         }
                         StopwatchDetailScreen(
