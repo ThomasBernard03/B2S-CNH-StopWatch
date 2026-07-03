@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
@@ -82,11 +83,16 @@ class MainActivity : ComponentActivity() {
                     ) {
                         val viewModel = koinViewModel<StopwatchDetailViewModel>()
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                        LaunchedEffect(uiState.isDeleted) {
+                            if (uiState.isDeleted) {
+                                navController.popBackStack()
+                            }
+                        }
                         StopwatchDetailScreen(
                             uiState = uiState,
                             onEvent = { event ->
                                 when (event) {
-                                    StopwatchDetailEvent.OnGoBack -> navController.popBackStack()
+                                    StopwatchDetailEvent.OnGoBack -> navController.navigateUp()
                                     else -> viewModel.onEvent(event)
                                 }
                             }

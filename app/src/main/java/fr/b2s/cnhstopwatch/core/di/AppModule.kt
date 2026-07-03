@@ -4,6 +4,7 @@ import fr.b2s.cnhstopwatch.data.local.CNHDatabase
 import fr.b2s.cnhstopwatch.data.repositories.StopwatchRepositoryImpl
 import fr.b2s.cnhstopwatch.domain.repositories.StopwatchRepository
 import fr.b2s.cnhstopwatch.domain.usecases.CreateStopwatchUseCase
+import fr.b2s.cnhstopwatch.domain.usecases.DeleteStopwatchUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.GetAllStopwatchesUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.GetStopwatchByIdUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.ResetStopwatchUseCase
@@ -28,10 +29,10 @@ val appModule = module {
     singleOf(::StartStopwatchUseCase)
     singleOf(::StopStopwatchUseCase)
     singleOf(::ResetStopwatchUseCase)
+    singleOf(::DeleteStopwatchUseCase)
     viewModelOf(::NewStopwatchViewModel)
     viewModelOf(::StopwatchListViewModel)
     viewModelOf(::StopwatchDetailViewModel)
 }
-
 
 

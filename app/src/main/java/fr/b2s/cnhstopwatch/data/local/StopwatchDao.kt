@@ -15,6 +15,9 @@ interface StopwatchDao {
     @Update
     suspend fun update(stopwatch: StopwatchEntity)
 
+    @Query("DELETE FROM stopwatches WHERE id = :id")
+    suspend fun deleteById(id: Long)
+
     @Query("SELECT * FROM stopwatches ORDER BY createdAt DESC")
     fun getAll(): Flow<List<StopwatchEntity>>
 

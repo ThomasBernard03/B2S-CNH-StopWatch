@@ -46,6 +46,10 @@ internal class StopwatchRepositoryImpl(
         stopwatchDao.update(updated)
     }
 
+    override suspend fun deleteStopwatch(id: Long) {
+        stopwatchDao.deleteById(id)
+    }
+
     override fun getAllStopwatches(): Flow<List<Stopwatch>> {
         return stopwatchDao.getAll().map { entities ->
             entities.map { it.toDomain() }

@@ -3,6 +3,7 @@ package fr.b2s.cnhstopwatch.presentation.stopwatchDetail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import fr.b2s.cnhstopwatch.domain.usecases.DeleteStopwatchUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.GetStopwatchByIdUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.ResetStopwatchUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.StartStopwatchUseCase
@@ -21,7 +22,8 @@ class StopwatchDetailViewModel(
     private val getStopwatchByIdUseCase: GetStopwatchByIdUseCase,
     private val startStopwatchUseCase: StartStopwatchUseCase,
     private val stopStopwatchUseCase: StopStopwatchUseCase,
-    private val resetStopwatchUseCase: ResetStopwatchUseCase
+    private val resetStopwatchUseCase: ResetStopwatchUseCase,
+    private val deleteStopwatchUseCase: DeleteStopwatchUseCase
 ) : ViewModel() {
 
     private val stopwatchId: Long = savedStateHandle.get<Long>("id") ?: 0L
@@ -79,6 +81,7 @@ class StopwatchDetailViewModel(
             StopwatchDetailEvent.OnStart -> start()
             StopwatchDetailEvent.OnPause -> pause()
             StopwatchDetailEvent.OnReset -> reset()
+            StopwatchDetailEvent.OnDelete -> delete()
         }
     }
 
@@ -92,5 +95,13 @@ class StopwatchDetailViewModel(
 
     private fun reset() {
         viewModelScope.launch { resetStopwatchUseCase(stopwatchId) }
+    }
+
+    private fun delete() {
+        viewModelScope.launch {
+            deleteStopwatchUseCase(stopwatchId)
+            stopTicker()
+            _uiState.update { it.copy(isDeleted = true) }
+        }
     }
 }

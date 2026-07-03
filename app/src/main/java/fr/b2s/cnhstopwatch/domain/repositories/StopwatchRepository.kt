@@ -8,6 +8,7 @@ interface StopwatchRepository {
     suspend fun startStopwatch(id: Long)
     suspend fun stopStopwatch(id: Long)
     suspend fun resetStopwatch(id: Long)
+    suspend fun deleteStopwatch(id: Long)
     fun getAllStopwatches(): Flow<List<Stopwatch>>
     fun getStopwatchById(id: Long): Flow<Stopwatch?>
 }

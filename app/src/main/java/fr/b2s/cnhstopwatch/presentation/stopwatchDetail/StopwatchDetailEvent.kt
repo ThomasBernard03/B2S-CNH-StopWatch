@@ -5,4 +5,5 @@ sealed interface StopwatchDetailEvent {
     data object OnStart : StopwatchDetailEvent
     data object OnPause : StopwatchDetailEvent
     data object OnReset : StopwatchDetailEvent
+    data object OnDelete : StopwatchDetailEvent
 }

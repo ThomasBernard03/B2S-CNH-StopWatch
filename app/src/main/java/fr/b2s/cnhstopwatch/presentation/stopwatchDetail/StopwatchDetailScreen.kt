@@ -11,8 +11,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,8 +24,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +44,9 @@ fun StopwatchDetailScreen(
     uiState: StopwatchDetailUiState,
     onEvent: (StopwatchDetailEvent) -> Unit
 ) {
+    var isMenuExpanded by remember { mutableStateOf(false) }
+    var isDeleteConfirmationVisible by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -44,6 +56,26 @@ fun StopwatchDetailScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { isMenuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = "More options"
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = isMenuExpanded,
+                        onDismissRequest = { isMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Delete") },
+                            onClick = {
+                                isMenuExpanded = false
+                                isDeleteConfirmationVisible = true
+                            }
                         )
                     }
                 }
@@ -105,6 +137,29 @@ fun StopwatchDetailScreen(
                 }
             }
         }
+    }
+
+    if (isDeleteConfirmationVisible) {
+        AlertDialog(
+            onDismissRequest = { isDeleteConfirmationVisible = false },
+            title = { Text("Delete stopwatch") },
+            text = { Text("Are you sure you want to delete this stopwatch?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        isDeleteConfirmationVisible = false
+                        onEvent(StopwatchDetailEvent.OnDelete)
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { isDeleteConfirmationVisible = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
