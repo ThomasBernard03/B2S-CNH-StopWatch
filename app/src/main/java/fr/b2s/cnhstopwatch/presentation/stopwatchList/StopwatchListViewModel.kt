@@ -73,7 +73,7 @@ class StopwatchListViewModel(
 
     fun onEvent(event: StopwatchListEvent) {
         when (event) {
-            StopwatchListEvent.OnCreateNew -> Unit
+            StopwatchListEvent.OnCreateMultiple -> Unit
             is StopwatchListEvent.OnStopwatchClick -> Unit
         }
     }

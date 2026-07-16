@@ -14,9 +14,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import fr.b2s.cnhstopwatch.presentation.core.theme.CNHStopWatchTheme
-import fr.b2s.cnhstopwatch.presentation.newStopwatch.NewStopwatchEvent
-import fr.b2s.cnhstopwatch.presentation.newStopwatch.NewStopwatchScreen
-import fr.b2s.cnhstopwatch.presentation.newStopwatch.NewStopwatchViewModel
+import fr.b2s.cnhstopwatch.presentation.newStopwatches.NewStopwatchesEvent
+import fr.b2s.cnhstopwatch.presentation.newStopwatches.NewStopwatchesScreen
+import fr.b2s.cnhstopwatch.presentation.newStopwatches.NewStopwatchesViewModel
 import fr.b2s.cnhstopwatch.presentation.stopwatchDetail.StopwatchDetailEvent
 import fr.b2s.cnhstopwatch.presentation.stopwatchDetail.StopwatchDetailScreen
 import fr.b2s.cnhstopwatch.presentation.stopwatchDetail.StopwatchDetailViewModel
@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
                             uiState = uiState,
                         onEvent = { event ->
                             when (event) {
-                                StopwatchListEvent.OnCreateNew -> navController.navigate("new_stopwatch"){
+                                StopwatchListEvent.OnCreateMultiple -> navController.navigate("new_stopwatches"){
                                     launchSingleTop = true
                                 }
                                 is StopwatchListEvent.OnStopwatchClick -> navController.navigate("stopwatch_detail/${event.id}"){
@@ -56,22 +56,15 @@ class MainActivity : ComponentActivity() {
                         }
                         )
                     }
-                    composable("new_stopwatch") {
-                        val viewModel = koinViewModel<NewStopwatchViewModel>()
+                    composable("new_stopwatches") {
+                        val viewModel = koinViewModel<NewStopwatchesViewModel>()
                         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                        NewStopwatchScreen(
+                        NewStopwatchesScreen(
                             uiState = uiState,
                             onEvent = { event ->
                                 when (event) {
-                                    NewStopwatchEvent.OnGoBack -> navController.popBackStack()
-                                    is NewStopwatchEvent.OnStopWatchCreated -> {
-                                        navController.navigate("stopwatch_detail/${event.stopwatch.id}"){
-                                            launchSingleTop = true
-                                            popUpTo("new_stopwatch"){
-                                                inclusive = true
-                                            }
-                                        }
-                                    }
+                                    NewStopwatchesEvent.OnGoBack -> navController.popBackStack()
+                                    NewStopwatchesEvent.OnStopwatchesCreated -> navController.popBackStack()
                                     else -> viewModel.onEvent(event)
                                 }
                             }

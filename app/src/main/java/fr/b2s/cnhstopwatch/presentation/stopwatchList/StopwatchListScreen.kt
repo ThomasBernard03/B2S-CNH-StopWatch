@@ -56,7 +56,7 @@ fun StopwatchListScreen(
         },
         floatingActionButton = {
             if (selectedTabIndex == 0) {
-                FloatingActionButton(onClick = { onEvent(StopwatchListEvent.OnCreateNew) }) {
+                FloatingActionButton(onClick = { onEvent(StopwatchListEvent.OnCreateMultiple) }) {
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = "Nouveau chronomètre"

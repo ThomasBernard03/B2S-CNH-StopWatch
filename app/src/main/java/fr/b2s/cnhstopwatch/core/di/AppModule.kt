@@ -10,7 +10,7 @@ import fr.b2s.cnhstopwatch.domain.usecases.GetStopwatchByIdUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.ResetStopwatchUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.StartStopwatchUseCase
 import fr.b2s.cnhstopwatch.domain.usecases.StopStopwatchUseCase
-import fr.b2s.cnhstopwatch.presentation.newStopwatch.NewStopwatchViewModel
+import fr.b2s.cnhstopwatch.presentation.newStopwatches.NewStopwatchesViewModel
 import fr.b2s.cnhstopwatch.presentation.stopwatchDetail.StopwatchDetailViewModel
 import fr.b2s.cnhstopwatch.presentation.stopwatchList.StopwatchListViewModel
 import org.koin.android.ext.koin.androidContext
@@ -30,9 +30,8 @@ val appModule = module {
     singleOf(::StopStopwatchUseCase)
     singleOf(::ResetStopwatchUseCase)
     singleOf(::DeleteStopwatchUseCase)
-    viewModelOf(::NewStopwatchViewModel)
+    viewModelOf(::NewStopwatchesViewModel)
     viewModelOf(::StopwatchListViewModel)
     viewModelOf(::StopwatchDetailViewModel)
 }
-
 
