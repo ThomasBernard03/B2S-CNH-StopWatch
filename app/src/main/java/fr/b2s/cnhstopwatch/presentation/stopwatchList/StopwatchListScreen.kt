@@ -1,6 +1,8 @@
 package fr.b2s.cnhstopwatch.presentation.stopwatchList
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,8 +17,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -26,10 +30,12 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,7 +52,14 @@ fun StopwatchListScreen(
     onEvent: (StopwatchListEvent) -> Unit
 ) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var isInEditMode by remember { mutableStateOf(false) }
+    var selectedStopwatchIds by remember { mutableStateOf(emptySet<Long>()) }
     val tabs = listOf("Chronomètres", "Classement")
+
+    fun leaveEditMode() {
+        isInEditMode = false
+        selectedStopwatchIds = emptySet()
+    }
 
     Scaffold(
         topBar = {
@@ -74,7 +87,10 @@ fun StopwatchListScreen(
                 tabs.forEachIndexed { index, title ->
                     Tab(
                         selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
+                        onClick = {
+                            selectedTabIndex = index
+                            leaveEditMode()
+                        },
                         text = { Text(title) }
                     )
                 }
@@ -85,7 +101,31 @@ fun StopwatchListScreen(
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
             } else if (selectedTabIndex == 0) {
-                StopwatchListContent(uiState = uiState, onEvent = onEvent)
+                StopwatchListContent(
+                    uiState = uiState,
+                    isInEditMode = isInEditMode,
+                    selectedStopwatchIds = selectedStopwatchIds,
+                    onStopwatchClick = { id ->
+                        if (isInEditMode) {
+                            selectedStopwatchIds = if (id in selectedStopwatchIds) {
+                                selectedStopwatchIds - id
+                            } else {
+                                selectedStopwatchIds + id
+                            }
+                        } else {
+                            onEvent(StopwatchListEvent.OnStopwatchClick(id))
+                        }
+                    },
+                    onStopwatchLongClick = { id ->
+                        isInEditMode = true
+                        selectedStopwatchIds = selectedStopwatchIds + id
+                    },
+                    onStartSelectedStopwatches = {
+                        onEvent(StopwatchListEvent.OnStartStopwatches(selectedStopwatchIds))
+                        leaveEditMode()
+                    },
+                    onCancelEditMode = ::leaveEditMode
+                )
             } else {
                 StopwatchRankingContent(uiState = uiState, onEvent = onEvent)
             }
@@ -96,7 +136,12 @@ fun StopwatchListScreen(
 @Composable
 private fun StopwatchListContent(
     uiState: StopwatchListUiState,
-    onEvent: (StopwatchListEvent) -> Unit
+    isInEditMode: Boolean,
+    selectedStopwatchIds: Set<Long>,
+    onStopwatchClick: (Long) -> Unit,
+    onStopwatchLongClick: (Long) -> Unit,
+    onStartSelectedStopwatches: () -> Unit,
+    onCancelEditMode: () -> Unit
 ) {
     if (uiState.stopwatches.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -108,16 +153,40 @@ private fun StopwatchListContent(
             )
         }
     } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(uiState.stopwatches, key = { it.id }) { stopwatch ->
-                StopwatchListItem(
-                    stopwatch = stopwatch,
-                    displayedMillis = uiState.displayedMillis[stopwatch.id] ?: 0L,
-                    onClick = { onEvent(StopwatchListEvent.OnStopwatchClick(stopwatch.id)) }
-                )
+        Column(modifier = Modifier.fillMaxSize()) {
+            if (isInEditMode) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Button(
+                        onClick = onStartSelectedStopwatches,
+                        enabled = selectedStopwatchIds.isNotEmpty()
+                    ) {
+                        Text("Lancer les chronomètres")
+                    }
+                    TextButton(onClick = onCancelEditMode) {
+                        Text("Annuler")
+                    }
+                }
+            }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(uiState.stopwatches, key = { it.id }) { stopwatch ->
+                    StopwatchListItem(
+                        stopwatch = stopwatch,
+                        displayedMillis = uiState.displayedMillis[stopwatch.id] ?: 0L,
+                        isInEditMode = isInEditMode,
+                        isSelected = stopwatch.id in selectedStopwatchIds,
+                        onClick = { onStopwatchClick(stopwatch.id) },
+                        onLongClick = { onStopwatchLongClick(stopwatch.id) }
+                    )
+                }
             }
         }
     }
@@ -157,35 +226,58 @@ private fun StopwatchRankingContent(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun StopwatchListItem(
     stopwatch: Stopwatch,
     displayedMillis: Long,
-    onClick: () -> Unit
+    isInEditMode: Boolean,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            }
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stopwatch.name,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = formatElapsedTime(displayedMillis),
-                style = MaterialTheme.typography.headlineSmall,
-                color = if (stopwatch.isRunning) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            )
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isInEditMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onClick() }
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+            Column {
+                Text(
+                    text = stopwatch.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = formatElapsedTime(displayedMillis),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = if (stopwatch.isRunning) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
         }
     }
 }
@@ -280,7 +372,35 @@ private fun StopwatchListContentPreview() {
                 isLoading = false,
                 displayedMillis = mapOf(1L to 62000L, 2L to 125000L)
             ),
-            onEvent = {}
+            isInEditMode = false,
+            selectedStopwatchIds = emptySet(),
+            onStopwatchClick = {},
+            onStopwatchLongClick = {},
+            onStartSelectedStopwatches = {},
+            onCancelEditMode = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun StopwatchListContentEditModePreview() {
+    CNHStopWatchTheme {
+        StopwatchListContent(
+            uiState = StopwatchListUiState(
+                stopwatches = listOf(
+                    Stopwatch(id = 1, name = "Task 1", createdAt = System.currentTimeMillis(), accumulatedMillis = 60000L),
+                    Stopwatch(id = 2, name = "Task 2", createdAt = System.currentTimeMillis(), accumulatedMillis = 125000L)
+                ),
+                isLoading = false,
+                displayedMillis = mapOf(1L to 60000L, 2L to 125000L)
+            ),
+            isInEditMode = true,
+            selectedStopwatchIds = setOf(1L),
+            onStopwatchClick = {},
+            onStopwatchLongClick = {},
+            onStartSelectedStopwatches = {},
+            onCancelEditMode = {}
         )
     }
 }
@@ -309,7 +429,10 @@ private fun StopwatchListItemPreview() {
         StopwatchListItem(
             stopwatch = Stopwatch(id = 1, name = "Task 1", createdAt = System.currentTimeMillis()),
             displayedMillis = 62000L,
-            onClick = {}
+            isInEditMode = false,
+            isSelected = false,
+            onClick = {},
+            onLongClick = {}
         )
     }
 }

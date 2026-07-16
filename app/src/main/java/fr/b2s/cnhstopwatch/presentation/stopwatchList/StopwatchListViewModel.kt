@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import fr.b2s.cnhstopwatch.domain.models.Stopwatch
 import fr.b2s.cnhstopwatch.domain.usecases.GetAllStopwatchesUseCase
+import fr.b2s.cnhstopwatch.domain.usecases.StartStopwatchUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class StopwatchListViewModel(
-    private val getAllStopwatchesUseCase: GetAllStopwatchesUseCase
+    private val getAllStopwatchesUseCase: GetAllStopwatchesUseCase,
+    private val startStopwatchUseCase: StartStopwatchUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(StopwatchListUiState())
@@ -75,6 +77,15 @@ class StopwatchListViewModel(
         when (event) {
             StopwatchListEvent.OnCreateMultiple -> Unit
             is StopwatchListEvent.OnStopwatchClick -> Unit
+            is StopwatchListEvent.OnStartStopwatches -> startStopwatches(event.ids)
+        }
+    }
+
+    private fun startStopwatches(ids: Set<Long>) {
+        viewModelScope.launch {
+            currentStopwatches
+                .filter { stopwatch -> stopwatch.id in ids && !stopwatch.isRunning }
+                .forEach { stopwatch -> startStopwatchUseCase(stopwatch.id) }
         }
     }
 }

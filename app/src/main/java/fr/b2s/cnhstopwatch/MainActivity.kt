@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
                                 is StopwatchListEvent.OnStopwatchClick -> navController.navigate("stopwatch_detail/${event.id}"){
                                     launchSingleTop = true
                                 }
+                                is StopwatchListEvent.OnStartStopwatches -> Unit
                             }
                             viewModel.onEvent(event)
                         }
